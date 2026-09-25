@@ -1,12 +1,12 @@
 import * as T from './vendor/three.module.js';
-import {addDetails,tileMaterial,texture} from './detail.js?v=18.1';
-import {courtyardFinish} from './interior.js?v=18.1';
-import {joinery} from './joinery.js?v=18.1';
-import {L} from './layout.js?v=18.1';
-import {beveledBox,mineralBlock} from './solid-materials.js?v=18.1';
-import {solidFinish} from './solid-finish.js?v=18.1';
-import {botanical} from './botanical.js?v=18.1';
-import {surfaceShading} from './surface-shading.js?v=18.1';
+import {addDetails,tileMaterial,texture} from './detail.js?v=19.0';
+import {courtyardFinish} from './interior.js?v=19.0';
+import {joinery} from './joinery.js?v=19.0';
+import {L} from './layout.js?v=19.0';
+import {beveledBox,mineralBlock} from './solid-materials.js?v=19.0';
+import {solidFinish} from './solid-finish.js?v=19.0';
+import {botanical} from './botanical.js?v=19.0';
+import {surfaceShading} from './surface-shading.js?v=19.0';
 
 export function buildCourtyard(scene){
  const root=new T.Group();root.name='courtyard';scene.add(root);const materials=new Map(),openings=[];
@@ -39,7 +39,19 @@ export function buildCourtyard(scene){
    }
  }
  // Courtyard continues LEVEL to the cellar doors. The basin is an actual hole in the slab.
- box(22,.25,27,1,-.55,2.5,'#b6ab98');
+ // Rounded exhibition plinth; top remains below the original courtyard datum.
+ function plinth(w,d,r,y,h,color,metalness){
+  const shape=new T.Shape(),x=-w/2,z=-d/2;
+  shape.moveTo(x+r,z);shape.lineTo(x+w-r,z);shape.quadraticCurveTo(x+w,z,x+w,z+r);
+  shape.lineTo(x+w,z+d-r);shape.quadraticCurveTo(x+w,z+d,x+w-r,z+d);
+  shape.lineTo(x+r,z+d);shape.quadraticCurveTo(x,z+d,x,z+d-r);
+  shape.lineTo(x,z+r);shape.quadraticCurveTo(x,z,x+r,z);
+  const geo=new T.ExtrudeGeometry(shape,{depth:h,bevelEnabled:true,bevelSegments:3,bevelSize:.07,bevelThickness:.05,curveSegments:10,steps:1});
+  geo.rotateX(-Math.PI/2);const mesh=new T.Mesh(geo,new T.MeshStandardMaterial({color,roughness:.36,metalness}));mesh.position.set(1,y,2.5);mesh.name='圆角展示台';mesh.receiveShadow=true;mesh.castShadow=true;root.add(mesh);
+ }
+ plinth(22,27,.9,-1.27,.68,'#353e42',.3);
+ plinth(22.06,27.06,.93,-.64,.055,'#ae9160',.72);
+ plinth(22,27,.9,-.57,.10,'#c1bba9',.08);
  const B=L.basin,bx0=B.x-B.width/2,bx1=B.x+B.width/2,bz0=B.z-B.depth/2,bz1=B.z+B.depth/2;
  const slab=(x0,x1,z0,z1)=>box(x1-x0,.16,z1-z0,(x0+x1)/2,-.08,(z0+z1)/2,'#aaa795');
  slab(-5.1,bx0,-3.6,12.6);slab(bx1,5.1,-3.6,12.6);slab(bx0,bx1,-3.6,bz0);slab(bx0,bx1,bz1,12.6);

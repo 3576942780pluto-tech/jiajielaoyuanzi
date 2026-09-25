@@ -1,7 +1,7 @@
 import * as T from './vendor/three.module.js';
-import {beveledBox} from './solid-materials.js?v=18.1';
+import {beveledBox} from './solid-materials.js?v=19.0';
 
-export function createArrival({renderer,scene,camera,courtyard,controls,host}){
+export function createArrival({renderer,scene,camera,courtyard,controls,host,environment}){
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const overlay=document.getElementById('arrival'),open=document.getElementById('arrival-open'),skip=document.getElementById('arrival-skip'),caption=document.getElementById('arrival-caption');
  const canvas=renderer.domElement,originalCamera=camera.position.clone(),originalTarget=controls.target.clone();
@@ -32,34 +32,37 @@ export function createArrival({renderer,scene,camera,courtyard,controls,host}){
  line([[-.48,.28,1.68],[-.48,.27,1.95],[-.32,.26,2.05],[.32,.26,2.05],[.48,.27,1.95],[.48,.28,1.68]],.065,leather,suitcase);
  for(const x of [-.48,.48])block(.17,.13,.05,x,.28,1.7,brass);
  const floor=block(200,.1,200,0,-.13,0,new T.MeshStandardMaterial({color:'#0d0b09',roughness:.63}),stage,.01);
- const light=new T.SpotLight(0xffe6c1,110,35,.47,.8,1.3);light.position.set(-1,8,3);light.target.position.set(0,0,0);light.castShadow=true;light.shadow.mapSize.set(2048,2048);light.shadow.bias=-.00015;stage.add(light,light.target);
+ const light=new T.SpotLight(0xffe6c1,110,35,.47,.8,1.3);light.position.set(-1,8,3);light.target.position.set(0,0,0);light.castShadow=true;light.shadow.mapSize.set(1024,1024);light.shadow.bias=-.00015;stage.add(light,light.target);
  const fill=new T.HemisphereLight(0xe0d5c7,0x17100b,.14);stage.add(fill);
- const daylight=scene.children.filter(o=>o.isLight).map(o=>{const copy=o.clone();copy.castShadow=false;const power=o.intensity;copy.intensity=0;stage.add(copy);return {copy,power};});
+ const daylight=scene.children.filter(o=>o.isLight).map(o=>{const copy=o.clone();copy.castShadow=false;const power=o.intensity;copy.intensity=0;stage.add(copy);return {copy,source:o};});
  const model=new T.Group();model.scale.setScalar(.103);model.position.set(0,.22,-.24);stage.add(model);model.add(courtyard);courtyard.visible=false;
- let state='enter',started=null,phase=0,finished=false,lastNow=0;
+ let warmed=false;let state='enter',started=null,phase=0,finished=false,lastNow=0;
  const ease=t=>t*t*(3-2*t),clamp=t=>Math.max(0,Math.min(1,t));
  const page=[document.querySelector('header'),document.querySelector('main')];page.forEach(e=>e.inert=true);document.body.classList.add('arriving');controls.enabled=false;
- open.disabled=true;caption.textContent='一只行囊，装着四代人的故乡。';
+ open.disabled=true;caption.textContent='正在准备院落与光影…';
+ let preparing=true,preparingPromiseSkip=false;
+ async function prepare(){try{renderer.setSize(innerWidth,innerHeight,false);renderer.render(stage,eye);await new Promise(resolve=>requestAnimationFrame(resolve));courtyard.visible=true;await renderer.compileAsync(stage,eye);scene.add(courtyard);await renderer.compileAsync(scene,camera);model.add(courtyard);const target=new T.WebGLRenderTarget(64,64);renderer.setRenderTarget(target);renderer.shadowMap.needsUpdate=true;renderer.render(stage,eye);renderer.setRenderTarget(null);target.dispose();courtyard.visible=false;}finally{preparing=false;if(preparingPromiseSkip)finish();caption.textContent='一只行囊，装着四代人的故乡。';}}
+ prepare().catch(e=>console.warn('渲染预热未完成',e));
  function start(){if(state!=='ready')return;state='open';phase=lastNow;open.disabled=true;open.classList.add('depart');caption.textContent='院子还在，回忆就有了归处。';}
- function finish(){if(finished)return;finished=true;scene.add(courtyard);courtyard.visible=true;model.removeFromParent();canvas.removeAttribute('style');document.body.classList.remove('arriving');page.forEach(e=>e.inert=false);overlay.remove();camera.position.copy(originalCamera);controls.target.copy(originalTarget);controls.enabled=true;controls.autoRotate=false;const rotate=document.getElementById('rotate');rotate.textContent='自动旋转';rotate.setAttribute('aria-pressed','false');controls.update();renderer.setSize(host.clientWidth,host.clientHeight);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();document.getElementById('orbit').focus({preventScroll:true});open.removeEventListener('click',start);skip.removeEventListener('click',finish);resources.forEach(g=>g.dispose());[leather,trim,brass,lining,stitchMat,floor.material].forEach(m=>m.dispose());light.shadow.map?.dispose();}
+ function finish(){if(preparing){preparingPromiseSkip=true;return;}if(finished)return;finished=true;scene.add(environment.root);environment.reveal(1);scene.add(courtyard);renderer.shadowMap.needsUpdate=true;courtyard.visible=true;model.removeFromParent();canvas.removeAttribute('style');document.body.classList.remove('arriving');page.forEach(e=>e.inert=false);overlay.remove();camera.position.copy(originalCamera);controls.target.copy(originalTarget);controls.enabled=true;controls.autoRotate=false;const rotate=document.getElementById('rotate');rotate.textContent='自动旋转';rotate.setAttribute('aria-pressed','false');controls.update();renderer.setSize(host.clientWidth,host.clientHeight);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();document.getElementById('orbit').focus({preventScroll:true});open.removeEventListener('click',start);skip.removeEventListener('click',finish);resources.forEach(g=>g.dispose());[leather,trim,brass,lining,stitchMat,floor.material].forEach(m=>m.dispose());light.shadow.map?.dispose();}
  open.addEventListener('click',start);skip.addEventListener('click',finish);
- return {update(now){if(finished)return false;lastNow=now;if(started===null)started=now;const elapsed=(now-started)/1000;
+ return {update(now){if(finished)return false;if(preparing)return true;lastNow=now;if(started===null)started=now;const elapsed=(now-started)/1000;
   if(state==='enter'){const t=clamp(elapsed/(reduced?.25:2.3));suitcase.position.y=(1-ease(t))*3.7;suitcase.rotation.set((1-t)*.20,(1-ease(t))*-.35,(1-t)*.12);if(t===1){state='ready';open.disabled=false;caption.textContent='点击手提箱，打开家的记忆';}}
   if(state==='open'){const t=clamp((now-phase)/(reduced?250:1600));lid.rotation.x=-ease(t)*Math.PI*.64;courtyard.visible=t>.18;if(t===1){state='hold';phase=now;}}
-  if(state==='hold'&&now-phase>=1000){state='travel';phase=now;overlay.classList.add('travelling');}
+  if(state==='hold'&&now-phase>=1000){state='travel';phase=now;overlay.classList.add('travelling');stage.add(environment.root);environment.reveal(0);}
   initialEye.set(5,5.4,7.5).multiplyScalar(Math.max(1,1.05/(innerWidth/innerHeight)));
   if(state!=='travel'){eye.position.copy(initialEye);eye.lookAt(initialTarget);}
   let travel=state==='travel'?ease(clamp((now-phase)/(reduced?350:2400))):0;
   if(state==='travel'){
    model.scale.setScalar(T.MathUtils.lerp(.103,1,travel));model.position.set(0,.22*(1-travel),-.24*(1-travel));
    eye.position.lerpVectors(initialEye,originalCamera,travel);eye.lookAt(initialTarget.clone().lerp(originalTarget,travel));
-   suitcase.position.y=-travel*5;stage.background.copy(new T.Color('#090807')).lerp(scene.background,travel);
-   fill.intensity=.14*(1-travel);light.intensity=110*(1-travel);daylight.forEach(({copy,power})=>copy.intensity=power*travel);stage.environmentIntensity=T.MathUtils.lerp(.13,.65,travel);
+   environment.reveal(travel);suitcase.position.y=-travel*5;stage.background.copy(new T.Color('#090807')).lerp(scene.background,travel);
+   fill.intensity=.14*(1-travel);light.intensity=110*(1-travel);daylight.forEach(({copy,source})=>{copy.intensity=source.intensity*travel;copy.color.copy(source.color);copy.position.copy(source.position);});stage.environmentIntensity=T.MathUtils.lerp(.13,scene.environmentIntensity,travel);if(scene.fog){stage.fog=stage.fog||scene.fog.clone();stage.fog.color.copy(scene.fog.color);stage.fog.near=T.MathUtils.lerp(180,scene.fog.near,travel);stage.fog.far=T.MathUtils.lerp(200,scene.fog.far,travel);}
    floor.material.transparent=true;floor.material.opacity=1-travel;document.body.style.setProperty('--arrival-reveal',travel);
    if(travel>=1){finish();return false;}
   }
   overlay.dataset.phase=state;
   const rect=host.getBoundingClientRect(),x=rect.left*travel,y=rect.top*travel,w=T.MathUtils.lerp(innerWidth,rect.width,travel),h=T.MathUtils.lerp(innerHeight,rect.height,travel);
-  Object.assign(canvas.style,{position:'fixed',left:x+'px',top:y+'px',width:w+'px',height:h+'px',zIndex:'40'});if(canvas.width!==Math.round(w*renderer.getPixelRatio())||canvas.height!==Math.round(h*renderer.getPixelRatio()))renderer.setSize(w,h,false);eye.aspect=w/h;eye.updateProjectionMatrix();renderer.render(stage,eye);return true;
+  Object.assign(canvas.style,{position:'fixed',left:x+'px',top:y+'px',width:w+'px',height:h+'px',zIndex:'40'});if(!warmed){renderer.setSize(innerWidth,innerHeight,false);warmed=true;}eye.fov=T.MathUtils.lerp(38,camera.fov,travel);eye.aspect=w/h;eye.updateProjectionMatrix();renderer.shadowMap.needsUpdate=state!=='ready';renderer.render(stage,eye);return true;
  }};
 }

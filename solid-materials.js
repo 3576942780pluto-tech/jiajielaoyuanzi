@@ -1,7 +1,7 @@
 import * as T from './vendor/three.module.js';
 const bevels=new Map();
 // Rounded solid blocks with sub-millimetre surface variation, never image displacement.
-export function mineralBlock(w,h,d,seed=0,nx=8,nz=4){
+export function mineralBlock(w,h,d,seed=0,nx=2,nz=1){
  const r=Math.min(.0025,h*.12),geo=new T.BoxGeometry(w,h,d,nx,2,nz),a=geo.attributes.position;
  const half=new T.Vector3(w/2,h/2,d/2),core=half.clone().addScalar(-r);
  for(let i=0;i<a.count;i++){

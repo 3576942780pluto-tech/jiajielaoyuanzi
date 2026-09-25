@@ -1,18 +1,18 @@
-import {createArrival} from './arrival.js?v=18.1';
-import {createWeather} from './weather.js?v=18.1';
+import {createArrival} from './arrival.js?v=19.0';
+import {createWeather} from './weather.js?v=19.0';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
-import {surface,movePlayer} from './navigation.js?v=18.1';
-import {L,VIEWS} from './layout.js?v=18.1';
-import {batchStatic} from './render-batch.js?v=18.1';
-import {buildCourtyard} from './model.js?v=18.1';
+import {surface,movePlayer} from './navigation.js?v=19.0';
+import {L,VIEWS} from './layout.js?v=19.0';
+import {batchStatic} from './render-batch.js?v=19.0';
+import {buildCourtyard} from './model.js?v=19.0';
 
 const $=id=>document.getElementById(id), host=$('scene');
 const scene=new THREE.Scene();scene.background=new THREE.Color('#e3dfd6');
 const camera=new THREE.PerspectiveCamera(45,1,.08,180);camera.position.fromArray(VIEWS.overview.position);
 let renderer;
-try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){document.getElementById('arrival')?.remove();$('loading').textContent='当前设备无法启动三维画面，请在支持 WebGL 的浏览器中打开。';throw e;}
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;host.appendChild(renderer.domElement);
+try{renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});}catch(e){document.getElementById('arrival')?.remove();$('loading').textContent='当前设备无法启动三维画面，请在支持 WebGL 的浏览器中打开。';throw e;}
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;host.appendChild(renderer.domElement);
 const controls=new OrbitControls(camera,renderer.domElement);controls.target.fromArray(VIEWS.overview.target);controls.enableDamping=true;controls.minDistance=1.2;controls.maxDistance=65;controls.maxPolarAngle=Math.PI*.48;controls.autoRotate=!matchMedia('(prefers-reduced-motion: reduce)').matches;controls.autoRotateSpeed=.35;
 scene.add(new THREE.HemisphereLight(0xf7f9ff,0x777b76,1.2));const sun=new THREE.DirectionalLight(0xfffbf5,3);sun.position.set(12,25,12);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-18,right:18,top:18,bottom:-18,near:1,far:70});sun.shadow.bias=-.0004;scene.add(sun);
 const {root:courtyard,gateLeaves}=buildCourtyard(scene);
@@ -24,7 +24,8 @@ const pmrem=new THREE.PMREMGenerator(renderer);scene.environment=pmrem.fromScene
 const weather=createWeather({scene,courtyard,sun});
 batchStatic(courtyard,[...gateLeaves.map(g=>g.pivot),...weather.movingRoots]);
 
-const arrival=createArrival({renderer,scene,camera,courtyard,controls,host});
+await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+const arrival=createArrival({renderer,scene,camera,courtyard,controls,host,environment:weather.environment});
 let playerLevel='yard';
 let mode='orbit', gateOpen=false,gateAngle=0,yaw=Math.PI/2,pitch=0;const keys=new Set();const player=new THREE.Vector3(L.spawn.x,surface(L.spawn.x,L.spawn.z)+1.62,L.spawn.z);let dragging=null;
 function setMode(next){keys.clear();mode=next;$('viewpoints').parentElement.hidden=mode==='walk';controls.enabled=mode==='orbit';$('orbit').classList.toggle('selected',mode==='orbit');$('walk').classList.toggle('selected',mode==='walk');$('orbit').setAttribute('aria-pressed',mode==='orbit');$('walk').setAttribute('aria-pressed',mode==='walk');$('walkpad').hidden=mode!=='walk';$('mode-label').textContent=mode==='walk'?'步行漫游':'院落全景';$('hint').textContent=mode==='walk'?'方向键行走 · 拖动画面环顾':'拖动旋转 · 滚轮或双指缩放';$('rotate').disabled=mode==='walk';reset();if(innerWidth<=650)host.scrollIntoView({block:'start',behavior:'instant'});}
@@ -46,8 +47,8 @@ $('photos').onclick=()=>{keys.clear();showPhoto(0);$('photo-dialog').showModal()
 $('viewpoints').onchange=()=>{const selected=$('viewpoints').value;if(mode!=='orbit')setMode('orbit');$('viewpoints').value=selected;const v=VIEWS[selected];controls.autoRotate=false;$('rotate').textContent='自动旋转';$('rotate').setAttribute('aria-pressed','false');camera.position.fromArray(v.position);controls.target.fromArray(v.target);controls.update();renderer.render(scene,camera);};
 $('plan').onclick=()=>{keys.clear();showPhoto(4);$('photo-dialog').showModal();};
 $('zoom-plan').onclick=()=>{const enlarged=$('photo-frame').classList.toggle('enlarged');$('zoom-plan').textContent=enlarged?'查看全图':'放大结构图';$('zoom-plan').setAttribute('aria-pressed',enlarged);};
-new ResizeObserver(()=>{const w=host.clientWidth,h=host.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);}).observe(host);
-let last=performance.now();function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(document.hidden)return;if(arrival.update(now))return;weather.update(now/1000,dt,camera);gateAngle=THREE.MathUtils.damp(gateAngle,gateOpen?1.55:0,5,dt);for(const {pivot,s}of gateLeaves)pivot.rotation.y=-s*gateAngle;
+new ResizeObserver(()=>{if(document.body.classList.contains('arriving'))return;const w=host.clientWidth,h=host.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);}).observe(host);
+let last=performance.now();function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(document.hidden)return;if(arrival.update(now))return;weather.update(now/1000,dt,camera);if(Math.abs(gateAngle-(gateOpen?1.55:0))>.001||now-(renderer.userDataShadowTime||0)>1000){renderer.shadowMap.needsUpdate=true;renderer.userDataShadowTime=now;}gateAngle=THREE.MathUtils.damp(gateAngle,gateOpen?1.55:0,5,dt);for(const {pivot,s}of gateLeaves)pivot.rotation.y=-s*gateAngle;
 if(mode==='orbit')controls.update(dt);else{let forward=(keys.has('w')?1:0)-(keys.has('s')?1:0),side=(keys.has('d')?1:0)-(keys.has('a')?1:0);const len=Math.hypot(forward,side)||1;forward/=len;side/=len;const dx=(-Math.sin(yaw)*forward+Math.cos(yaw)*side)*dt*2.4,dz=(-Math.cos(yaw)*forward-Math.sin(yaw)*side)*dt*2.4;const next=movePlayer({x:player.x,z:player.z,level:playerLevel},dx,dz,gateAngle);player.x=next.x;player.z=next.z;playerLevel=next.level||'yard';player.y=THREE.MathUtils.damp(player.y,surface(player.x,player.z,playerLevel)+1.62,16,dt);camera.position.copy(player);camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);}
 $('north').style.transform=`rotate(${mode==='walk'?yaw:controls.getAzimuthalAngle()}rad)`;renderer.render(scene,camera);}
 requestAnimationFrame(animate);$('loading').hidden=true;
