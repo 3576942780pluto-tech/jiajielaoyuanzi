@@ -5,7 +5,7 @@ export function createArrival({renderer,scene,camera,courtyard,controls,host,env
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const overlay=document.getElementById('arrival'),open=document.getElementById('arrival-open'),skip=document.getElementById('arrival-skip'),caption=document.getElementById('arrival-caption');
  const canvas=renderer.domElement,originalCamera=camera.position.clone(),originalTarget=controls.target.clone();
- const stage=new T.Scene();stage.background=new T.Color('#090807');stage.environment=scene.environment;stage.environmentIntensity=.13;
+ const stage=new T.Scene();stage.background=new T.Color('#090807');stage.environment=scene.environment;stage.environmentIntensity=.13;stage.fog=scene.fog?.clone();if(stage.fog){stage.fog.near=180;stage.fog.far=200;}environment.reveal(1);
  const eye=new T.PerspectiveCamera(38,innerWidth/innerHeight,.03,200);eye.position.set(5,5.4,7.5);eye.lookAt(0,.1,0);
  const initialEye=eye.position.clone(),initialTarget=new T.Vector3(0,.1,0);
  const suitcase=new T.Group();stage.add(suitcase);
@@ -32,6 +32,7 @@ export function createArrival({renderer,scene,camera,courtyard,controls,host,env
  line([[-.48,.28,1.68],[-.48,.27,1.95],[-.32,.26,2.05],[.32,.26,2.05],[.48,.27,1.95],[.48,.28,1.68]],.065,leather,suitcase);
  for(const x of [-.48,.48])block(.17,.13,.05,x,.28,1.7,brass);
  const floor=block(200,.1,200,0,-.13,0,new T.MeshStandardMaterial({color:'#0d0b09',roughness:.63}),stage,.01);
+ floor.material.transparent=true;
  const light=new T.SpotLight(0xffe6c1,110,35,.47,.8,1.3);light.position.set(-1,8,3);light.target.position.set(0,0,0);light.castShadow=true;light.shadow.mapSize.set(1024,1024);light.shadow.bias=-.00015;stage.add(light,light.target);
  const fill=new T.HemisphereLight(0xe0d5c7,0x17100b,.14);stage.add(fill);
  const daylight=scene.children.filter(o=>o.isLight).map(o=>{const copy=o.clone();copy.castShadow=false;const power=o.intensity;copy.intensity=0;stage.add(copy);return {copy,source:o};});
@@ -41,7 +42,7 @@ export function createArrival({renderer,scene,camera,courtyard,controls,host,env
  const page=[document.querySelector('header'),document.querySelector('main')];page.forEach(e=>e.inert=true);document.body.classList.add('arriving');controls.enabled=false;
  open.disabled=true;caption.textContent='正在准备院落与光影…';
  let preparing=true,preparingPromiseSkip=false;
- async function prepare(){try{renderer.setSize(innerWidth,innerHeight,false);renderer.render(stage,eye);await new Promise(resolve=>requestAnimationFrame(resolve));courtyard.visible=true;await renderer.compileAsync(stage,eye);scene.add(courtyard);await renderer.compileAsync(scene,camera);model.add(courtyard);const target=new T.WebGLRenderTarget(64,64);renderer.setRenderTarget(target);renderer.shadowMap.needsUpdate=true;renderer.render(stage,eye);renderer.setRenderTarget(null);target.dispose();courtyard.visible=false;}finally{preparing=false;if(preparingPromiseSkip)finish();caption.textContent='一只行囊，装着四代人的故乡。';}}
+ async function prepare(){try{renderer.setSize(innerWidth,innerHeight,false);renderer.render(stage,eye);await new Promise(resolve=>requestAnimationFrame(resolve));courtyard.visible=true;stage.add(environment.root);await renderer.compileAsync(stage,eye);scene.add(environment.root);scene.add(courtyard);await renderer.compileAsync(scene,camera);model.add(courtyard);const target=new T.WebGLRenderTarget(64,64);renderer.setRenderTarget(target);renderer.shadowMap.needsUpdate=true;renderer.render(stage,eye);renderer.setRenderTarget(null);target.dispose();courtyard.visible=false;}finally{preparing=false;if(preparingPromiseSkip)finish();caption.textContent='一只行囊，装着四代人的故乡。';}}
  prepare().catch(e=>console.warn('渲染预热未完成',e));
  function start(){if(state!=='ready')return;state='open';phase=lastNow;open.disabled=true;open.classList.add('depart');caption.textContent='院子还在，回忆就有了归处。';}
  function finish(){if(preparing){preparingPromiseSkip=true;return;}if(finished)return;finished=true;scene.add(environment.root);environment.reveal(1);scene.add(courtyard);renderer.shadowMap.needsUpdate=true;courtyard.visible=true;model.removeFromParent();canvas.removeAttribute('style');document.body.classList.remove('arriving');page.forEach(e=>e.inert=false);overlay.remove();camera.position.copy(originalCamera);controls.target.copy(originalTarget);controls.enabled=true;controls.autoRotate=false;const rotate=document.getElementById('rotate');rotate.textContent='自动旋转';rotate.setAttribute('aria-pressed','false');controls.update();renderer.setSize(host.clientWidth,host.clientHeight);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();document.getElementById('orbit').focus({preventScroll:true});open.removeEventListener('click',start);skip.removeEventListener('click',finish);resources.forEach(g=>g.dispose());[leather,trim,brass,lining,stitchMat,floor.material].forEach(m=>m.dispose());light.shadow.map?.dispose();}
