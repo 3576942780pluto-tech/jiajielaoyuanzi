@@ -1,4 +1,4 @@
-import {L} from './layout.js?v=19.1';
+import {L} from './layout.js?v=20.0';
 // Navigation uses the same working dimensions as the render model.
 export function surface(x,z,level='yard'){
  if(level==='cellar')return z>=L.platformFront-.12?0:z>=L.platformFront-.12-L.cellarStepDepth?L.cellarFloor/2:L.cellarFloor;

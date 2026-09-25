@@ -1,12 +1,12 @@
 import * as T from './vendor/three.module.js';
-import {addDetails,tileMaterial,texture} from './detail.js?v=19.1';
-import {courtyardFinish} from './interior.js?v=19.1';
-import {joinery} from './joinery.js?v=19.1';
-import {L} from './layout.js?v=19.1';
-import {beveledBox,mineralBlock} from './solid-materials.js?v=19.1';
-import {solidFinish} from './solid-finish.js?v=19.1';
-import {botanical} from './botanical.js?v=19.1';
-import {surfaceShading} from './surface-shading.js?v=19.1';
+import {addDetails,tileMaterial,texture} from './detail.js?v=20.0';
+import {courtyardFinish} from './interior.js?v=20.0';
+import {joinery} from './joinery.js?v=20.0';
+import {L} from './layout.js?v=20.0';
+import {beveledBox,mineralBlock} from './solid-materials.js?v=20.0';
+import {solidFinish} from './solid-finish.js?v=20.0';
+import {botanical} from './botanical.js?v=20.0';
+import {surfaceShading} from './surface-shading.js?v=20.0';
 
 export function buildCourtyard(scene){
  const root=new T.Group();root.name='courtyard';scene.add(root);const materials=new Map(),openings=[];

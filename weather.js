@@ -1,6 +1,6 @@
 import * as T from './vendor/three.module.js';
-import {createSkyEnvironment} from './sky-environment.js?v=19.1';
-import {surface} from './navigation.js?v=19.1';
+import {createSkyEnvironment} from './sky-environment.js?v=20.0';
+import {surface} from './navigation.js?v=20.0';
 export function weatherKind(code){return [71,73,75,77,85,86].includes(code)?'snow':[51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(code)?'rain':code===0||code===1?'sun':'cloud';}
 export function seasonFor(month){return month>=3&&month<=5?'春':month>=6&&month<=8?'夏':month>=9&&month<=11?'秋':'冬';}
 export function weatherLabel(code){return ({0:'晴',1:'少云',2:'多云',3:'阴',45:'雾',48:'雾凇',51:'小毛毛雨',53:'毛毛雨',55:'强毛毛雨',56:'冻毛毛雨',57:'冻毛毛雨',61:'小雨',63:'中雨',65:'大雨',66:'冻雨',67:'强冻雨',71:'小雪',73:'中雪',75:'大雪',77:'米雪',80:'阵雨',81:'中阵雨',82:'强阵雨',85:'阵雪',86:'强阵雪',95:'雷雨',96:'雷雨伴冰雹',99:'雷雨伴强冰雹'})[code]||'天气状态未知';}
