@@ -1,4 +1,4 @@
-import {createArrival} from './arrival.js?v=19.2';
+import {createArrival} from './arrival.js?v=19.3';
 import {createWeather} from './weather.js?v=19.1';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';

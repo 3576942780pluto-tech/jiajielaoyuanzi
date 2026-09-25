@@ -4,7 +4,7 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#422322"><meta name="description" content="重返嘉节老院子，在三维院落里寻找一家四代人的回忆。">
   <title>嘉节老院子 · 四代人的回忆</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=19.2">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=19.3">
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/"}}</script>
   <style>
 #memory-preparing{position:fixed;inset:0;z-index:100;background:#090807;color:#e9dcc7;display:grid;place-content:center;text-align:center;padding:28px;font-family:"Microsoft YaHei",sans-serif}#memory-preparing h2{font:clamp(19px,3vw,28px)/1.8 "SimSun",serif;letter-spacing:3px;font-weight:400}#memory-preparing p{font-size:12px;color:#aa9984;letter-spacing:2px;line-height:2}#memory-preparing .memory-mark{font-size:12px;letter-spacing:7px;color:#b6a183}#memory-retry{color:#e9dcc7;border:1px solid #77634b;background:transparent;padding:12px 22px;margin:20px auto 0;cursor:pointer}body:has(#memory-preparing){overflow:hidden}
@@ -52,6 +52,6 @@
   <dialog id="photo-dialog"><div class="dialog-head"><h2>照片里的老院子</h2><button data-close aria-label="关闭照片">×</button></div><div id="photo-tabs"></div><button id="zoom-plan" hidden aria-pressed="false">放大结构图</button><div id="photo-frame"><img id="photo-image" alt=""></div><p id="photo-caption"></p></dialog>
   <dialog id="about-dialog"><div class="dialog-head"><h2>嘉节老院子</h2><button data-close aria-label="关闭说明">×</button></div><p>这座位于山西省太原市小店区嘉节村的老院子，承载着一家四代人的回忆。</p><p>根据两页项目说明、十二张老照片和补充手绘图还原院落：从东南侧大门向西穿过门厅，再向北走向楼梯与高平台。门厅南端是一间房屋，厕所仍位于西南角、西侧最南小门。</p><p>这是结构修订后的空间原型。房屋尺寸与屋顶形制还需要进一步核对。春联中尚未辨清的字保留待核，不用新词替换；人物、车辆和临时杂物不进入三维场景。</p><p>电脑：WASD 或方向键行走，拖动环顾，E 开关门。手机：按住方向按钮行走，在场景空白处滑动环顾。碰到边界时可用“回到起点”。</p></dialog>
   <script type="module">
-import('./app.js?v=19.2').catch(()=>{document.getElementById('memory-progress').textContent='暂时未能完成准备，请检查网络后重试。';document.getElementById('memory-preparing').setAttribute('aria-busy','false');document.getElementById('memory-retry').hidden=false;});
+import('./app.js?v=19.3').catch(()=>{document.getElementById('memory-progress').textContent='暂时未能完成准备，请检查网络后重试。';document.getElementById('memory-preparing').setAttribute('aria-busy','false');document.getElementById('memory-retry').hidden=false;});
 </script>
 </body></html>
