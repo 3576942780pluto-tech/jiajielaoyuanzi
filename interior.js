@@ -1,6 +1,6 @@
 import * as T from './vendor/three.module.js';
-import {outlines} from './ornament-outlines.js?v=19.0';
-import {beveledBox} from './solid-materials.js?v=19.0';
+import {outlines} from './ornament-outlines.js?v=19.1';
+import {beveledBox} from './solid-materials.js?v=19.1';
 // Courtyard-facing finish. Layout comes only from the previously confirmed L data.
 export function courtyardFinish({root,L,box,rod,ball,tileMaterial,texture}){
  const finish=new T.Group();finish.name='院内精细构件';root.add(finish);

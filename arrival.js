@@ -1,5 +1,5 @@
 import * as T from './vendor/three.module.js';
-import {beveledBox} from './solid-materials.js?v=19.0';
+import {beveledBox} from './solid-materials.js?v=19.1';
 
 export function createArrival({renderer,scene,camera,courtyard,controls,host,environment}){
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;

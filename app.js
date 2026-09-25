@@ -1,11 +1,11 @@
-import {createArrival} from './arrival.js?v=19.0';
-import {createWeather} from './weather.js?v=19.0';
+import {createArrival} from './arrival.js?v=19.1';
+import {createWeather} from './weather.js?v=19.1';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
-import {surface,movePlayer} from './navigation.js?v=19.0';
-import {L,VIEWS} from './layout.js?v=19.0';
-import {batchStatic} from './render-batch.js?v=19.0';
-import {buildCourtyard} from './model.js?v=19.0';
+import {surface,movePlayer} from './navigation.js?v=19.1';
+import {L,VIEWS} from './layout.js?v=19.1';
+import {batchStatic} from './render-batch.js?v=19.1';
+import {buildCourtyard} from './model.js?v=19.1';
 
 const $=id=>document.getElementById(id), host=$('scene');
 const scene=new THREE.Scene();scene.background=new THREE.Color('#e3dfd6');
