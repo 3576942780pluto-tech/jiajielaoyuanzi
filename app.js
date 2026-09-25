@@ -1,4 +1,4 @@
-import {createArrival} from './arrival.js?v=19.1';
+import {createArrival} from './arrival.js?v=19.2';
 import {createWeather} from './weather.js?v=19.1';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
@@ -15,6 +15,8 @@ try{renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-perfo
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;host.appendChild(renderer.domElement);
 const controls=new OrbitControls(camera,renderer.domElement);controls.target.fromArray(VIEWS.overview.target);controls.enableDamping=true;controls.minDistance=1.2;controls.maxDistance=65;controls.maxPolarAngle=Math.PI*.48;controls.autoRotate=!matchMedia('(prefers-reduced-motion: reduce)').matches;controls.autoRotateSpeed=.35;
 scene.add(new THREE.HemisphereLight(0xf7f9ff,0x777b76,1.2));const sun=new THREE.DirectionalLight(0xfffbf5,3);sun.position.set(12,25,12);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-18,right:18,top:18,bottom:-18,near:1,far:70});sun.shadow.bias=-.0004;scene.add(sun);
+await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+document.getElementById('memory-progress').textContent='正在整理院落与手提箱…';
 const {root:courtyard,gateLeaves}=buildCourtyard(scene);
 // Rendered studio sky for physical reflections; no external environment image.
 const reflectionScene=new THREE.Scene();reflectionScene.background=new THREE.Color('#b9c6d1');

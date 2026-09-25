@@ -42,8 +42,32 @@ export function createArrival({renderer,scene,camera,courtyard,controls,host,env
  const page=[document.querySelector('header'),document.querySelector('main')];page.forEach(e=>e.inert=true);document.body.classList.add('arriving');controls.enabled=false;
  open.disabled=true;caption.textContent='正在准备院落与光影…';
  let preparing=true,preparingPromiseSkip=false;
- async function prepare(){try{renderer.setSize(innerWidth,innerHeight,false);renderer.render(stage,eye);await new Promise(resolve=>requestAnimationFrame(resolve));courtyard.visible=true;stage.add(environment.root);await renderer.compileAsync(stage,eye);scene.add(environment.root);scene.add(courtyard);await renderer.compileAsync(scene,camera);model.add(courtyard);const target=new T.WebGLRenderTarget(64,64);renderer.setRenderTarget(target);renderer.shadowMap.needsUpdate=true;renderer.render(stage,eye);renderer.setRenderTarget(null);target.dispose();courtyard.visible=false;}finally{preparing=false;if(preparingPromiseSkip)finish();caption.textContent='一只行囊，装着四代人的故乡。';}}
- prepare().catch(e=>console.warn('渲染预热未完成',e));
+ const preparation=document.getElementById('memory-preparing'),progress=document.getElementById('memory-progress');
+ const nextFrame=()=>new Promise(resolve=>requestAnimationFrame(resolve));
+ async function gpuReady(){
+  const gl=renderer.getContext(),fence=gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE,0);if(!fence)throw Error('GPU fence unavailable');gl.flush();
+  const deadline=performance.now()+60000;
+  try{while(true){if(gl.isContextLost())throw Error('WebGL context lost');const result=gl.clientWaitSync(fence,0,0);if(result===gl.ALREADY_SIGNALED||result===gl.CONDITION_SATISFIED)return;if(result===gl.WAIT_FAILED||performance.now()>deadline)throw Error('GPU preparation failed');await nextFrame();}}finally{gl.deleteSync(fence);}
+ }
+ async function prepare(){
+  progress.textContent='正在准备光影与材质…';
+  Object.assign(canvas.style,{position:'fixed',left:'0px',top:'0px',width:'100vw',height:'100vh',zIndex:'40'});
+  renderer.setSize(innerWidth,innerHeight,false);warmed=true;
+  courtyard.visible=true;stage.add(environment.root);await renderer.compileAsync(stage,eye);
+  scene.add(environment.root);scene.add(courtyard);await renderer.compileAsync(scene,camera);
+  progress.textContent='正在检查画面，马上出发…';
+  // Exercise actual full-resolution buffers and both light/shadow pipelines behind the loading screen.
+  renderer.shadowMap.needsUpdate=true;renderer.render(scene,camera);await gpuReady();
+  model.add(courtyard);stage.add(environment.root);lid.rotation.x=-Math.PI*.64;
+  renderer.shadowMap.needsUpdate=true;renderer.render(stage,eye);await gpuReady();
+  scene.add(environment.root);lid.rotation.x=0;courtyard.visible=false;
+  suitcase.position.y=3.7;suitcase.rotation.set(.20,-.35,.12);
+  for(let i=0;i<3;i++){renderer.shadowMap.needsUpdate=true;renderer.render(stage,eye);await gpuReady();await nextFrame();}
+  // Start the entrance clock only after real GPU work has completed, not after a fixed timeout.
+  preparing=false;started=null;lastNow=0;overlay.inert=false;preparation.remove();
+  caption.textContent='一只行囊，装着四代人的故乡。';if(preparingPromiseSkip)finish();
+ }
+ prepare().catch(e=>{console.warn('渲染准备未完成',e);progress.textContent='画面暂时未能准备好，请重新尝试。';preparation.setAttribute('aria-busy','false');document.getElementById('memory-retry').hidden=false;});
  function start(){if(state!=='ready')return;state='open';phase=lastNow;open.disabled=true;open.classList.add('depart');caption.textContent='院子还在，回忆就有了归处。';}
  function finish(){if(preparing){preparingPromiseSkip=true;return;}if(finished)return;finished=true;scene.add(environment.root);environment.reveal(1);scene.add(courtyard);renderer.shadowMap.needsUpdate=true;courtyard.visible=true;model.removeFromParent();canvas.removeAttribute('style');document.body.classList.remove('arriving');page.forEach(e=>e.inert=false);overlay.remove();camera.position.copy(originalCamera);controls.target.copy(originalTarget);controls.enabled=true;controls.autoRotate=false;const rotate=document.getElementById('rotate');rotate.textContent='自动旋转';rotate.setAttribute('aria-pressed','false');controls.update();renderer.setSize(host.clientWidth,host.clientHeight);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();document.getElementById('orbit').focus({preventScroll:true});open.removeEventListener('click',start);skip.removeEventListener('click',finish);resources.forEach(g=>g.dispose());[leather,trim,brass,lining,stitchMat,floor.material].forEach(m=>m.dispose());light.shadow.map?.dispose();}
  open.addEventListener('click',start);skip.addEventListener('click',finish);
