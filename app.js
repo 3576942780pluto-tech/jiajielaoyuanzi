@@ -1,10 +1,11 @@
-import {createArrival} from './arrival.js?v=21.4';
-import {createWeather} from './weather.js?v=21.4';
+import {createArrival} from './arrival.js?v=23.0';
+import {createWeather} from './weather.js?v=23.0';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
-import {L,VIEWS} from './layout.js?v=21.4';
-import {batchStatic} from './render-batch.js?v=21.4';
-import {buildCourtyard} from './model.js?v=21.4';
+import {L,VIEWS} from './layout.js?v=23.0';
+import {batchStatic} from './render-batch.js?v=23.0';
+import {buildCourtyard} from './model.js?v=23.0';
+import {createPromenade} from './promenade.js?v=23.0';
 
 const $=id=>document.getElementById(id), host=$('scene');
 const scene=new THREE.Scene();scene.background=new THREE.Color('#e3dfd6');
@@ -23,7 +24,11 @@ const dome=new THREE.Mesh(new THREE.SphereGeometry(35,24,12),new THREE.MeshBasic
 for(const [x,y,z,w,h]of [[-12,12,5,15,10],[14,8,-10,7,15],[0,25,0,20,20]]){const p=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:'#fff8e9',side:THREE.DoubleSide}));p.position.set(x,y,z);p.lookAt(0,0,0);reflectionScene.add(p);}
 const pmrem=new THREE.PMREMGenerator(renderer);scene.environment=pmrem.fromScene(reflectionScene,.08).texture;scene.environmentIntensity=.65;pmrem.dispose();
 const weather=createWeather({scene,courtyard,sun});
-batchStatic(courtyard,[...gateLeaves.map(g=>g.pivot),...weather.movingRoots]);
+controls.rotateSpeed=.30;controls.zoomSpeed=.65;controls.panSpeed=.45;
+const promenade=await createPromenade({courtyard,camera,controls,canvas:renderer.domElement,weather,getGateAngle:()=>gateAngle,onGate:()=>document.getElementById('gate').click()});
+batchStatic(courtyard.getObjectByName('东南梨树_独立枝叶与梨果'),[]);
+batchStatic(courtyard,[...gateLeaves.map(g=>g.pivot),...weather.movingRoots,...promenade.movingRoots]);
+if(new URLSearchParams(location.search).has('qa'))window.courtyardQA={scene,camera,controls,courtyard,weather,promenade,renderer};
 
 await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 frameView('overview');
@@ -33,10 +38,9 @@ let gateOpen=false,gateAngle=0;
 const rotate=$('rotate');rotate.textContent='暂停旋转';
 $('gate').onclick=()=>{gateOpen=!gateOpen;$('gate').textContent=gateOpen?'关闭大门':'打开大门';$('gate').setAttribute('aria-pressed',gateOpen);};
 rotate.onclick=()=>{controls.autoRotate=!controls.autoRotate;rotate.textContent=controls.autoRotate?'暂停旋转':'自动旋转';rotate.setAttribute('aria-pressed',controls.autoRotate);};
-$('about').onclick=()=>$('about-dialog').showModal();
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 $('viewpoints').onchange=()=>{const v=VIEWS[$('viewpoints').value];controls.autoRotate=false;rotate.textContent='自动旋转';rotate.setAttribute('aria-pressed','false');frameView($('viewpoints').value);};
-new ResizeObserver(()=>{if(document.body.classList.contains('arriving'))return;const w=host.clientWidth,h=host.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);if(['overview','top'].includes($('viewpoints').value))frameView($('viewpoints').value);}).observe(host);
-let last=performance.now();function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(document.hidden)return;if(arrival.update(now))return;weather.update(now/1000,dt,camera);if(Math.abs(gateAngle-(gateOpen?1.55:0))>.001||now-(renderer.userDataShadowTime||0)>1000){renderer.shadowMap.needsUpdate=true;renderer.userDataShadowTime=now;}gateAngle=THREE.MathUtils.damp(gateAngle,gateOpen?1.55:0,5,dt);for(const {pivot,s}of gateLeaves)pivot.rotation.y=-s*gateAngle;controls.update(dt);$('north').style.transform=`rotate(${controls.getAzimuthalAngle()}rad)`;renderer.render(scene,camera);}
+new ResizeObserver(()=>{if(document.body.classList.contains('arriving'))return;const w=host.clientWidth,h=host.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);if(!promenade.active&&['overview','top'].includes($('viewpoints').value))frameView($('viewpoints').value);}).observe(host);
+let last=performance.now();function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(document.hidden)return;if(arrival.update(now))return;weather.update(now/1000,dt,camera);promenade.update(dt);if(promenade.active||Math.abs(gateAngle-(gateOpen?1.55:0))>.001||now-(renderer.userDataShadowTime||0)>1000){renderer.shadowMap.needsUpdate=true;renderer.userDataShadowTime=now;}gateAngle=THREE.MathUtils.damp(gateAngle,gateOpen?1.55:0,5,dt);for(const {pivot,s}of gateLeaves)pivot.rotation.y=-s*gateAngle;controls.update(dt);$('north').style.transform=`rotate(${controls.getAzimuthalAngle()}rad)`;renderer.render(scene,camera);}
 requestAnimationFrame(animate);$('loading').hidden=true;
 renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();$('loading').hidden=false;$('loading').textContent='三维画面暂时中断，请刷新页面重新进入。';});

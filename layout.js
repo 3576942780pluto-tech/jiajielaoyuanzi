@@ -10,7 +10,7 @@ export const L={
   platformHeight:2.16,northFacade:-6.6,northBack:-10.3,
   gateX:7.9,gateZ:8.3,hallNorth:6.85,hallSouth:9.75,gateClear:2.4,
   rampLength:1.65,rampDrop:.15,cellarX:3.08,cellarDoorWidth:1.05,cellarWindowX:4.48,
-  sideEave:3.05,northEave:5.16,spawn:{x:9.8,z:8.3},
+  sideEave:3.05,wcStart:11.56,wcEave:2.60,northEave:5.16,spawn:{x:9.8,z:8.3},
   cellarFloor:-.32,cellarStepDepth:.30,cellarBack:-4.90,cellarDoorHeight:2.06,
   stairPlants:[
     {kind:'fig',step:2,x:-1.62,scale:1,turn:.15,color:'#aaa58a'},
@@ -26,12 +26,14 @@ export const L={
   ladder:{bottom:[7.48,2.16,-5.08],top:[7.48,5.18,-6.44],width:.5},
   // Entries are independent openings. Door sidelights and transoms are not extra windows.
   north:[{id:'N-W0',kind:'window',u:-6.25,w:2.12},{id:'N-D1',kind:'door',u:-3.85,w:2.0},{id:'N-W1',kind:'window',u:-1.3,w:2.12},{id:'N-W2',kind:'window',u:1.3,w:2.12},{id:'N-D2',kind:'door',u:3.85,w:2.0},{id:'N-W3',kind:'window',u:6.25,w:2.12}],
-  west:[{id:'W-W1',kind:'window',u:.5,w:2.60},{id:'W-D1',kind:'door',u:4.1,w:3.10},{id:'W-D2',kind:'door',u:7.5,w:2.80,curtain:false},{id:'W-W2',kind:'window',u:10.1,w:1.60},{id:'WC-D',kind:'plain-door',u:11.93,w:.86}],
+  west:[{id:'W-W1',kind:'window',u:.5,w:2.60},{id:'W-D1',kind:'door',u:4.1,w:3.10},{id:'W-D2',kind:'door',u:7.5,w:2.80,curtain:false},{id:'W-W2',kind:'window',u:9.85,w:1.45},{id:'W-ST',kind:'storage-door',u:11.05,w:.76},{id:'WC-D',kind:'plain-door',u:12.03,w:.78}],
   east:[{id:'E-W1',kind:'window',u:-1.8,w:2.4},{id:'E-D1',kind:'door',u:1.55,w:2.8},{id:'E-W2',kind:'window',u:4.9,w:2.5},{id:'SE-D',kind:'door',u:11.16,w:1.85}],
 };
 export const VIEWS={
+  westStorage:{position:[-1.7,2.3,9.2],target:[-5.1,1.4,11.35]},
+  scooter:{position:[2.8,1.7,3.7],target:[.2,.7,1.6]},
   signage:{position:[9.05,1.83,5.95],target:[7.92,1.82,5.95]},
-  pear:{position:[-.2,3.4,8.4],target:[3.4,1.7,11.93]},
+  pear:{position:[-2.6,4.9,5.9],target:[3.4,2.4,11.93]},
   storage:{position:[-3.55,9.5,12.9],target:[-3.55,0,13.35]},
   upstairs:{position:[-3,3.7,-1.5],target:[-3.5,3.6,-6.6]},
   plants:{position:[.1,1.45,1.8],target:[-1.8,.95,-.6]},

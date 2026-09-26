@@ -1,5 +1,5 @@
 import * as T from './vendor/three.module.js';
-import {glyphs} from './renewed-lettering.js?v=21.4';
+import {glyphs} from './renewed-lettering.js?v=23.0';
 const mat=(color,roughness=.6,metalness=0)=>new T.MeshStandardMaterial({color,roughness,metalness});
 function mesh(g,m,parent,x=0,y=0,z=0){const o=new T.Mesh(g,m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;parent.add(o);return o;}
 function rod(parent,a,b,r,m,r2=r){const d=new T.Vector3(...b).sub(new T.Vector3(...a)),o=mesh(new T.CylinderGeometry(r2,r,d.length(),9),m,parent);o.position.copy(new T.Vector3(...a).addScaledVector(d,.5));o.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.normalize());return o;}
@@ -29,7 +29,9 @@ export function addPearAndStorage(root,L){
    for(let k=0;k<16;k++){const u=.15+rnd()*.88,pos=base.clone().lerp(tip,u);pos.x+=(rnd()-.5)*.20;pos.y+=(rnd()-.5)*.2;pos.z+=(rnd()-.5)*.20;if(pos.y<2.65)pos.z=Math.min(pos.z,.5);d.position.copy(pos);d.rotation.set(rnd()*1.9-.95,angle+rnd()*2,(-1+2*rnd())*1.4);d.scale.setScalar(.70+rnd()*.5);d.updateMatrix();leaves.setMatrixAt(n,d.matrix);leaves.setColorAt(n,new T.Color().setHSL(.22+rnd()*.065,.35+rnd()*.2,.30+rnd()*.17));q.position.set(0,.085,.017).applyMatrix4(d.matrix);q.quaternion.copy(d.quaternion);q.scale.copy(d.scale);q.updateMatrix();veins.setMatrixAt(n,q.matrix);n++;}
    if(j===5&&i%2===0){const pos=tip.clone().add(new T.Vector3(0,-.14,0));mesh(fruitGeo,fruitMat,tree,...pos.toArray());rod(tree,tip.toArray(),[pos.x,pos.y+.18,pos.z],.003,bark);fruits++;}
   }
- }leaves.count=veins.count=n;tree.userData={leafCount:n,fruitCount:fruits,positionBasis:'Opposite WC door; same approximate clearance as WC-to-service-door distance'};
+ }leaves.count=veins.count=n;tree.scale.set(1.22,1.48,1.22);
+ const outer=leaves.clone();outer.name='梨树_外层浓密树冠';outer.scale.set(1.13,1.06,1.13);outer.rotation.y=.43;outer.position.y=.12;tree.add(outer);
+ tree.userData={leafCount:n*2,fruitCount:fruits,positionBasis:'Opposite WC door; same approximate clearance as WC-to-service-door distance'};
  const storage=new T.Group();storage.name='杂物间_旧床板与水桶';root.add(storage);const wood=mat('#8b7154',.95),iron=mat('#929b94',.72,.35);
  for(let i=0;i<7;i++){const b=mesh(new T.BoxGeometry(.22,1.65,.06),wood,storage,-6.7+i*.27,.84,13.69);b.rotation.x=.16;b.rotation.z=(i%3-1)*.025;for(const y of [.18,1.47])mesh(new T.SphereGeometry(.009,6,4),iron,storage,-6.7+i*.27,y,13.62);}
  for(let i=0;i<4;i++){const b=mesh(new T.BoxGeometry(1.7,.07,.23),wood,storage,-5.4,.09+i*.075,13.10);b.rotation.y=.04*i;}

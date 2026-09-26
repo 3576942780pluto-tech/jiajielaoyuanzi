@@ -1,6 +1,6 @@
 import * as T from './vendor/three.module.js';
-import {outlines} from './ornament-outlines.js?v=21.4';
-import {beveledBox} from './solid-materials.js?v=21.4';
+import {outlines} from './ornament-outlines.js?v=23.0';
+import {beveledBox} from './solid-materials.js?v=23.0';
 // Courtyard-facing finish. Layout comes only from the previously confirmed L data.
 export function courtyardFinish({root,L,box,rod,ball,tileMaterial,texture}){
  const finish=new T.Group();finish.name='院内精细构件';root.add(finish);
@@ -27,19 +27,20 @@ export function courtyardFinish({root,L,box,rod,ball,tileMaterial,texture}){
    mesh.name='瓷砖_洞口裁切收边';mesh.receiveShadow=mesh.castShadow=true;parent.add(mesh);
   }
  }
- function wall(name,w,position,rot,holes,base=0){
+ function wall(name,w,position,rot,holes,base=0,top=2.88){
   const g=new T.Group();g.name=name;g.position.fromArray(position);g.rotation.y=rot;finish.add(g);
   tileLayer(g,w,base,base+.96,.24,.06,holes,true);
-  tileLayer(g,w,base+.96,base+2.88,.075,.24,holes,false);return g;
+  tileLayer(g,w,base+.96,base+top,.075,.24,holes,false);return g;
  }
  for(const s of [-1,1]){
-  const list=s<0?L.west:L.east,ranges=s<0?[[-3.6,12.6]]:[[-3.6,L.hallNorth],[L.hallSouth,12.6]];
+  const list=s<0?L.west:L.east,ranges=s<0?[[-3.6,L.wcStart],[L.wcStart,12.6]]:[[-3.6,L.hallNorth],[L.hallSouth,12.6]];
   for(const [a,b]of ranges){const mid=(a+b)/2,holes=list.filter(it=>it.u>a&&it.u<b).map(it=>({x0:s*(it.u-mid)-it.w/2-.045,x1:s*(it.u-mid)+it.w/2+.045,y0:it.kind==='window'?L.sideWindow.sill-.095:0,y1:it.kind==='window'?L.sideWindow.sill+L.sideWindow.height+.055:it.kind==='plain-door'?2.10:2.74}));
-   const g=wall(s<0?'西侧白瓷砖':'东侧白瓷砖',b-a,[s*(L.halfWidth-.048),0,mid],-s*Math.PI/2,holes);
+   const drop=s<0&&a===L.wcStart?L.sideEave-L.wcEave:0;
+   const g=wall(s<0?'西侧白瓷砖':'东侧白瓷砖',b-a,[s*(L.halfWidth-.048),0,mid],-s*Math.PI/2,holes,0,2.88-drop);
    // True soffit projection and underside bead, measured here only as working dimensions.
-   box(b-a+.08,.095,.55,0,2.98,.22,'#d7d8cf',g);
-   const fascia=box(b-a+.08,.18,.036,0,3.065,.49,tileMaterial('tile-red',b-a+.08,.18,.225,1.62),g);fascia.name=s<0?'西侧唯一红色檐口':'东侧唯一红色檐口';
-   box(b-a,.014,.02,0,2.93,.40,'#a9aea1',g);
+   box(b-a+.04,.095,.55,0,2.98-drop,.22,'#d7d8cf',g);
+   const fascia=box(b-a+.04,.18,.036,0,3.065-drop,.49,tileMaterial('tile-red',b-a+.04,.18,.225,1.62),g);fascia.name=drop?'厕所低檐口':s<0?'西侧唯一红色檐口':'东侧唯一红色檐口';
+   box(b-a,.014,.02,0,2.93-drop,.40,'#a9aea1',g);
    // Tile the window sill faces, keeping independent ends at each opening.
    for(const it of list.filter(it=>it.kind==='window'&&it.u>a&&it.u<b))box(it.w+.13,.065,.025,s*(it.u-mid),L.sideWindow.sill-.035,.19,tileMaterial('tile-red',it.w+.13,.065,.225,.585),g);
    const visible=list.filter(it=>it.u>a&&it.u<b);

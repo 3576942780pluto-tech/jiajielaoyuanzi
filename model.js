@@ -1,13 +1,13 @@
-import {renewDecor,addPearAndStorage} from './family-details.js?v=21.4';
+import {renewDecor,addPearAndStorage} from './family-details.js?v=23.0';
 import * as T from './vendor/three.module.js';
-import {addDetails,tileMaterial,texture} from './detail.js?v=21.4';
-import {courtyardFinish} from './interior.js?v=21.4';
-import {joinery} from './joinery.js?v=21.4';
-import {L} from './layout.js?v=21.4';
-import {beveledBox,mineralBlock} from './solid-materials.js?v=21.4';
-import {solidFinish} from './solid-finish.js?v=21.4';
-import {botanical} from './botanical.js?v=21.4';
-import {surfaceShading} from './surface-shading.js?v=21.4';
+import {addDetails,tileMaterial,texture} from './detail.js?v=23.0';
+import {courtyardFinish} from './interior.js?v=23.0';
+import {joinery} from './joinery.js?v=23.0';
+import {L} from './layout.js?v=23.0';
+import {beveledBox,mineralBlock} from './solid-materials.js?v=23.0';
+import {solidFinish} from './solid-finish.js?v=23.0';
+import {botanical} from './botanical.js?v=23.0';
+import {surfaceShading} from './surface-shading.js?v=23.0';
 
 export function buildCourtyard(scene){
  const root=new T.Group();root.name='courtyard';scene.add(root);const materials=new Map(),openings=[];
@@ -34,7 +34,17 @@ export function buildCourtyard(scene){
    for(const it of items){const g=new T.Group();g.name=it.id;parent.add(g);let u=it.u;
      if(side==='north')g.position.set(u,floor,L.northFacade+.10);
      else{g.position.set(side==='west'?-L.halfWidth+.03:L.halfWidth-.03,floor,u);g.rotation.y=side==='west'?Math.PI/2:-Math.PI/2;}
-     if(it.kind==='window')window(g,0,side==='north'?L.northWindow.sill+L.northWindow.height/2:L.sideWindow.sill+L.sideWindow.height/2,0,it.w,side==='north'?L.northWindow.height:L.sideWindow.height,side==='north'?'#6d4237':'#8c8f7d',side==='north'?4:3);
+     if(it.kind==='storage-door'){
+       box(it.w-.06,2.06,.055,0,1.04,-.015,'#bcb7a2',g);
+       for(const x of [-it.w/2,it.w/2])box(.045,2.73,.08,x,1.365,.01,'#9a9c8e',g);
+       for(const y of [.03,2.10,2.70])box(it.w,.045,.08,0,y,.01,'#a4a595',g);
+       box(it.w-.06,.54,.025,0,2.40,-.02,'#353b34',g);
+       box(.024,.54,.035,0,2.40,.005,'#919584',g);
+       box(.035,.11,.035,-it.w*.32,1.02,.036,'#615c4c',g);
+       const paper=box(.21,.21,.003,0,1.12,.018,'#ae4437',g);paper.rotation.z=Math.PI/4;
+       for(let k=0;k<9;k++)box(.008,.35+(k%3)*.12,.002,-.3+k*.073,.35+(k%2)*.4,.014,'#ada994',g);
+     }
+     else if(it.kind==='window')window(g,0,side==='north'?L.northWindow.sill+L.northWindow.height/2:L.sideWindow.height/2+L.sideWindow.sill,0,it.w,side==='north'?L.northWindow.height:L.sideWindow.height,side==='north'?'#6d4237':'#8c8f7d',side==='north'?4:3);
      else door(g,0,side!=='north'&&it.kind==='door'?L.doorstep.height:0,0,it.w,it.curtain,it.kind==='plain-door',side==='north'?'#6d4237':'#9d9e8c',side==='north'?null:L.sideDoorLeafWidth,side!=='north');
      openings.push({id:it.id,kind:it.kind,position:[g.position.x,g.position.y,g.position.z],width:it.w});
    }
@@ -101,13 +111,14 @@ export function buildCourtyard(scene){
    for(const y of [2.58,3.16])rod([s*2.34,y,-3.57],[s*5.1,y,-3.57]);
  }
  // West row includes its southwest toilet; east south room is flush with the east row.
- function wing(s,front,back){const len=back-front,z=(front+back)/2,x=s*6.5;
-  box(.18,3.02,len,s*7.85,1.51,z,'#c8cabd');for(const zz of [front,back])box(2.8,3.02,.16,x,1.51,zz,'#c8cabd');
-  box(2.8,.10,len,x,.02,z,'#8c8779');box(3.12,.15,len+.15,x,3.05,z,'#7a7b6c');const face=new T.Group();face.position.set(s*5.085,0,z);face.rotation.y=-s*Math.PI/2;root.add(face);
-  piercedWall(face,len,3.02,(s<0?L.west:L.east).filter(it=>it.u>front&&it.u<back).map(it=>({x0:s*(it.u-z)-it.w/2,x1:s*(it.u-z)+it.w/2,y0:it.kind==='window'?L.sideWindow.sill:0,y1:it.kind==='window'?L.sideWindow.sill+L.sideWindow.height:it.kind==='plain-door'?2.10:2.70})));
+ function wing(s,front,back,eave=3.05){const len=back-front,z=(front+back)/2,x=s*6.5,h=eave-.03;
+  box(.18,h,len,s*7.85,h/2,z,'#c8cabd');for(const zz of [front,back])box(2.8,h,.16,x,h/2,zz,'#c8cabd');
+  box(2.8,.10,len,x,.02,z,'#8c8779');box(3.12,.15,len+.05,x,eave,z,'#7a7b6c');const face=new T.Group();face.position.set(s*5.085,0,z);face.rotation.y=-s*Math.PI/2;root.add(face);
+  piercedWall(face,len,h,(s<0?L.west:L.east).filter(it=>it.u>front&&it.u<back).map(it=>({x0:s*(it.u-z)-it.w/2,x1:s*(it.u-z)+it.w/2,y0:it.kind==='window'?L.sideWindow.sill:0,y1:it.kind==='window'?L.sideWindow.sill+L.sideWindow.height:it.kind==='plain-door'?2.10:2.70})));
   // A single fascia is owned by courtyardFinish; duplicate roof-edge bands caused coplanar flicker.
  }
- wing(-1,-3.6,12.6);wing(1,-3.6,L.hallNorth);wing(1,L.hallSouth,12.6);
+ wing(-1,-3.6,L.wcStart);wing(-1,L.wcStart,12.6,L.wcEave);wing(1,-3.6,L.hallNorth);wing(1,L.hallSouth,12.6);
+ box(2.65,2.85,.10,-6.5,1.425,10.61,'#c8cabd');
  facade(L.west,'west');facade(L.east,'east');
  // Raised narrow thresholds/stoops, visually separate from the courtyard paving.
  for(const [s,items] of [[-1,L.west],[1,L.east]])for(const it of items.filter(o=>o.kind==='door')){const st=L.doorstep;box(st.depth,st.height,L.sideDoorLeafWidth+st.extraWidth,s*(L.halfWidth-st.depth/2),st.height/2,it.u,'#a6a595');}
