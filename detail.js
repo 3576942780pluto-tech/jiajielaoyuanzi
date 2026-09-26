@@ -91,8 +91,8 @@ export function addDetails({root,gate,gateLeaves,L,box,rod,ball,m}){
  for(const side of ['west','east']){
   const s=side==='west'?-1:1;const ranges=side==='west'?[[-3.6,12.6]]:[[-3.6,L.hallNorth],[L.hallSouth,12.6]];
   for(const [a,b]of ranges){const f=new T.Group();f.position.set(s*(L.halfWidth-.011),0,(a+b)/2);f.rotation.y=-s*Math.PI/2;root.add(f);
-   box(b-a+.11,.16,.20,0,3.06,.075,tileMaterial('tile-red',b-a+.11,.16,.45,.45),f);
-   box(b-a,.07,.36,0,2.93,.055,'#d7d6c8',f);
+   // Roof trim is built once in interior.js, avoiding coplanar red top faces.
+
   }
   // Downpipes at the facade joins, a fixed architectural detail visible in panoramas.
   for(const z of side==='west'?[2.45,9.22]:[.02,6.57,10.0]){

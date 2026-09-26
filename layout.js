@@ -26,10 +26,13 @@ export const L={
   ladder:{bottom:[7.48,2.16,-5.08],top:[7.48,5.18,-6.44],width:.5},
   // Entries are independent openings. Door sidelights and transoms are not extra windows.
   north:[{id:'N-W0',kind:'window',u:-6.25,w:2.12},{id:'N-D1',kind:'door',u:-3.85,w:2.0},{id:'N-W1',kind:'window',u:-1.3,w:2.12},{id:'N-W2',kind:'window',u:1.3,w:2.12},{id:'N-D2',kind:'door',u:3.85,w:2.0},{id:'N-W3',kind:'window',u:6.25,w:2.12}],
-  west:[{id:'W-W1',kind:'window',u:.5,w:2.60},{id:'W-D1',kind:'door',u:4.1,w:3.10},{id:'W-D2',kind:'door',u:7.5,w:2.80,curtain:true},{id:'W-W2',kind:'window',u:10.1,w:1.60},{id:'WC-D',kind:'plain-door',u:11.93,w:.86}],
+  west:[{id:'W-W1',kind:'window',u:.5,w:2.60},{id:'W-D1',kind:'door',u:4.1,w:3.10},{id:'W-D2',kind:'door',u:7.5,w:2.80,curtain:false},{id:'W-W2',kind:'window',u:10.1,w:1.60},{id:'WC-D',kind:'plain-door',u:11.93,w:.86}],
   east:[{id:'E-W1',kind:'window',u:-1.8,w:2.4},{id:'E-D1',kind:'door',u:1.55,w:2.8},{id:'E-W2',kind:'window',u:4.9,w:2.5},{id:'SE-D',kind:'door',u:11.16,w:1.85}],
 };
 export const VIEWS={
+  signage:{position:[9.05,1.83,5.95],target:[7.92,1.82,5.95]},
+  pear:{position:[-.2,3.4,8.4],target:[3.4,1.7,11.93]},
+  storage:{position:[-3.7,6,11],target:[-4.5,.65,13.3]},
   upstairs:{position:[-3,3.7,-1.5],target:[-3.5,3.6,-6.6]},
   plants:{position:[.1,1.45,1.8],target:[-1.8,.95,-.6]},
   joinery:{position:[-2.4,1.75,4.7],target:[-5.1,1.65,4.1]},

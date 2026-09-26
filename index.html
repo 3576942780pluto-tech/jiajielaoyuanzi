@@ -4,7 +4,7 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#422322"><meta name="description" content="重返嘉节老院子，在三维院落里寻找一家四代人的回忆。">
   <title>嘉节老院子 · 四代人的回忆</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=20.0">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=21.3">
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/"}}</script>
   <style>
 #memory-preparing{position:fixed;inset:0;z-index:100;background:#090807;color:#e9dcc7;display:grid;place-content:center;text-align:center;padding:28px;font-family:"Microsoft YaHei",sans-serif}#memory-preparing h2{font:clamp(19px,3vw,28px)/1.8 "SimSun",serif;letter-spacing:3px;font-weight:400}#memory-preparing p{font-size:12px;color:#aa9984;letter-spacing:2px;line-height:2}#memory-preparing .memory-mark{font-size:12px;letter-spacing:7px;color:#b6a183}#memory-retry{color:#e9dcc7;border:1px solid #77634b;background:transparent;padding:12px 22px;margin:20px auto 0;cursor:pointer}body:has(#memory-preparing){overflow:hidden}
@@ -15,25 +15,23 @@
     <span class="memory-mark">嘉节 · 家的记忆</span>
     <h2>正在取出回忆手提箱</h2>
     <p id="memory-progress">正在准备这段回家的旅程，请稍候…</p>
+    <button id="memory-enter" hidden>取出回忆手提箱</button>
     <button id="memory-retry" hidden onclick="location.reload()">重新准备</button>
   </section>
   <section inert id="arrival" aria-label="打开家的记忆">
     <div class="arrival-title"><span>嘉节 · 家的记忆</span><h1>把故乡，带在身边。</h1></div>
     <button id="arrival-open" aria-label="打开皮质手提箱" disabled><span>打开记忆</span></button>
     <p id="arrival-caption" role="status">正在准备一段回家的旅程…</p>
-    <button id="arrival-skip">直接进入院子 <span aria-hidden="true">↗</span></button>
   </section>
-  <header><a class="brand" href="./"><span class="seal">嘉</span><span>嘉节老院子<small>四代人的回忆</small></span></a><button id="about">关于这座院子</button></header>
+  <header><a class="brand" href="./"><span class="seal">嘉</span><span>嘉节老院子<small>四代人的回忆</small></span></a><button id="about">关于院子</button></header>
   <main>
     <section id="scene" aria-label="可旋转与漫游的三维院落"><div id="loading" role="status">正在打开老院子的门…</div>
-      <div class="scene-label"><span id="mode-label">院落全景</span><small>山西 · 太原 · 嘉节村</small></div>
-      <label class="viewpoints" for="viewpoints">查看位置<select id="viewpoints"><option value="overview">整体院落</option><option value="entrance">门外向西看</option><option value="north">北房与地下室</option><option value="west">西侧门窗</option><option value="east">东侧门窗</option><option value="top">俯视布局</option><option value="joinery">门窗近景</option><option value="upstairs">二楼门窗近景</option><option value="rail">扶手近景</option><option value="plants">植物近景</option><option value="paving">地砖近景</option></select></label>
       <div class="compass" title="场景中的北向随相机旋转"><span id="north">↑</span>北</div>
-      <div id="hint" role="status">拖动旋转 · 滚轮或双指缩放</div>
-      <div id="walkpad" hidden aria-label="行走方向"><button data-key="w" aria-label="向前走">↑</button><div><button data-key="a" aria-label="向左走">←</button><button data-key="s" aria-label="向后走">↓</button><button data-key="d" aria-label="向右走">→</button></div><button id="walk-gate" aria-pressed="false">打开大门</button></div>
-      <button id="reset" class="scene-reset">回到起点</button>
     </section>
     <aside>
+      <p id="hint">拖动旋转 · 滚轮或双指缩放</p>
+      <label class="viewpoints" for="viewpoints">查看位置<select id="viewpoints"><option value="overview">整体院落</option><option value="entrance">门外向西看</option><option value="north">北房与地下室</option><option value="west">西侧门窗</option><option value="east">东侧门窗</option><option value="top">俯视布局</option><option value="joinery">门窗近景</option><option value="upstairs">二楼门窗近景</option><option value="rail">扶手近景</option><option value="plants">植物近景</option><option value="signage">门牌与奶箱</option><option value="pear">梨树近景</option><option value="storage">杂物间</option><option value="paving">地砖近景</option></select></label>
+      <div class="tools"><button id="gate" aria-pressed="false">打开大门</button><button id="rotate" aria-pressed="true">暂停旋转</button></div>
       <section id="weather-panel" aria-label="太原日期与天气">
         <div class="weather-place">太原 · 嘉节 <span id="weather-date"></span></div>
         <p id="weather-summary" role="status">正在获取天气…</p>
@@ -42,16 +40,10 @@
         <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">天气数据：Open-Meteo</a>
       </section>
       <p class="eyebrow">重返记忆里的家</p><h1>院子还在，<br>回忆就有了归处。</h1>
-      <p class="intro">老院子已拆去十年，却一直住在我们心里。推开那扇门，再走一遍熟悉的台阶。</p>
-      <div class="mode-buttons" role="group" aria-label="选择视角"><button id="orbit" class="selected" aria-pressed="true"><strong>看一看院子</strong><span>第三人称 · 旋转与缩放</span></button><button id="walk" aria-pressed="false"><strong>走进老院子</strong><span>第一人称 · 自由行走</span></button></div>
-      <div class="tools"><button id="gate" aria-pressed="false">打开大门</button><button id="rotate" aria-pressed="true">暂停旋转</button><button id="plan">院落结构</button></div>
-      <button id="photos" class="photo-card"><img src="./assets/north.jpg" alt="旧照片中的北房与院中楼梯"><span><strong>照片里的老时光</strong><small>对照原始照片　↗</small></span></button>
-      <p class="boundary">空间原型 · 尺寸尚待校准<br>屋顶与未拍摄的室内为推定部分</p>
     </aside>
   </main>
-  <dialog id="photo-dialog"><div class="dialog-head"><h2>照片里的老院子</h2><button data-close aria-label="关闭照片">×</button></div><div id="photo-tabs"></div><button id="zoom-plan" hidden aria-pressed="false">放大结构图</button><div id="photo-frame"><img id="photo-image" alt=""></div><p id="photo-caption"></p></dialog>
-  <dialog id="about-dialog"><div class="dialog-head"><h2>嘉节老院子</h2><button data-close aria-label="关闭说明">×</button></div><p>这座位于山西省太原市小店区嘉节村的老院子，承载着一家四代人的回忆。</p><p>根据两页项目说明、十二张老照片和补充手绘图还原院落：从东南侧大门向西穿过门厅，再向北走向楼梯与高平台。门厅南端是一间房屋，厕所仍位于西南角、西侧最南小门。</p><p>这是结构修订后的空间原型。房屋尺寸与屋顶形制还需要进一步核对。春联中尚未辨清的字保留待核，不用新词替换；人物、车辆和临时杂物不进入三维场景。</p><p>电脑：WASD 或方向键行走，拖动环顾，E 开关门。手机：按住方向按钮行走，在场景空白处滑动环顾。碰到边界时可用“回到起点”。</p></dialog>
+  <dialog id="about-dialog"><div class="dialog-head"><h2>嘉节老院子</h2><button data-close aria-label="关闭说明">×</button></div><p>这座位于山西省太原市小店区嘉节村的老院子，承载着一家四代人的回忆。</p><p>根据两页项目说明、十二张老照片和补充手绘图还原院落：从东南侧大门向西穿过门厅，再向北走向楼梯与高平台。门厅南端是一间房屋，厕所仍位于西南角、西侧最南小门。</p><p>这是结构修订后的空间原型。房屋尺寸与屋顶形制还需要进一步核对。春联中尚未辨清的字保留待核，不用新词替换；杂物间的床板和水桶根据家人的补充描述布置。</p><p>拖动旋转院落，滚轮或双指缩放。可暂停自动旋转，并选择近景查看细节。</p></dialog>
   <script type="module">
-import('./app.js?v=20.0').catch(()=>{document.getElementById('memory-progress').textContent='暂时未能完成准备，请检查网络后重试。';document.getElementById('memory-preparing').setAttribute('aria-busy','false');document.getElementById('memory-retry').hidden=false;});
+import('./app.js?v=21.3').catch(()=>{document.getElementById('memory-progress').textContent='暂时未能完成准备，请检查网络后重试。';document.getElementById('memory-preparing').setAttribute('aria-busy','false');document.getElementById('memory-retry').hidden=false;});
 </script>
 </body></html>

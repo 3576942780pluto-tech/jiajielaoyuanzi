@@ -1,6 +1,6 @@
 import * as T from './vendor/three.module.js';
-import {outlines} from './ornament-outlines.js?v=20.0';
-import {beveledBox} from './solid-materials.js?v=20.0';
+import {outlines} from './ornament-outlines.js?v=21.3';
+import {beveledBox} from './solid-materials.js?v=21.3';
 // Courtyard-facing finish. Layout comes only from the previously confirmed L data.
 export function courtyardFinish({root,L,box,rod,ball,tileMaterial,texture}){
  const finish=new T.Group();finish.name='院内精细构件';root.add(finish);
@@ -38,7 +38,7 @@ export function courtyardFinish({root,L,box,rod,ball,tileMaterial,texture}){
    const g=wall(s<0?'西侧白瓷砖':'东侧白瓷砖',b-a,[s*(L.halfWidth-.048),0,mid],-s*Math.PI/2,holes);
    // True soffit projection and underside bead, measured here only as working dimensions.
    box(b-a+.08,.095,.55,0,2.98,.22,'#d7d8cf',g);
-   box(b-a+.08,.18,.036,0,3.065,.49,tileMaterial('tile-red',b-a+.08,.18,.225,1.62),g);
+   const fascia=box(b-a+.08,.18,.036,0,3.065,.49,tileMaterial('tile-red',b-a+.08,.18,.225,1.62),g);fascia.name=s<0?'西侧唯一红色檐口':'东侧唯一红色檐口';
    box(b-a,.014,.02,0,2.93,.40,'#a9aea1',g);
    // Tile the window sill faces, keeping independent ends at each opening.
    for(const it of list.filter(it=>it.kind==='window'&&it.u>a&&it.u<b))box(it.w+.13,.065,.025,s*(it.u-mid),L.sideWindow.sill-.035,.19,tileMaterial('tile-red',it.w+.13,.065,.225,.585),g);

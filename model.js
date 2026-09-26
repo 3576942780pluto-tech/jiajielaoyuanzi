@@ -1,12 +1,13 @@
+import {renewDecor,addPearAndStorage} from './family-details.js?v=21.3';
 import * as T from './vendor/three.module.js';
-import {addDetails,tileMaterial,texture} from './detail.js?v=20.0';
-import {courtyardFinish} from './interior.js?v=20.0';
-import {joinery} from './joinery.js?v=20.0';
-import {L} from './layout.js?v=20.0';
-import {beveledBox,mineralBlock} from './solid-materials.js?v=20.0';
-import {solidFinish} from './solid-finish.js?v=20.0';
-import {botanical} from './botanical.js?v=20.0';
-import {surfaceShading} from './surface-shading.js?v=20.0';
+import {addDetails,tileMaterial,texture} from './detail.js?v=21.3';
+import {courtyardFinish} from './interior.js?v=21.3';
+import {joinery} from './joinery.js?v=21.3';
+import {L} from './layout.js?v=21.3';
+import {beveledBox,mineralBlock} from './solid-materials.js?v=21.3';
+import {solidFinish} from './solid-finish.js?v=21.3';
+import {botanical} from './botanical.js?v=21.3';
+import {surfaceShading} from './surface-shading.js?v=21.3';
 
 export function buildCourtyard(scene){
  const root=new T.Group();root.name='courtyard';scene.add(root);const materials=new Map(),openings=[];
@@ -104,7 +105,7 @@ export function buildCourtyard(scene){
   box(.18,3.02,len,s*7.85,1.51,z,'#c8cabd');for(const zz of [front,back])box(2.8,3.02,.16,x,1.51,zz,'#c8cabd');
   box(2.8,.10,len,x,.02,z,'#8c8779');box(3.12,.15,len+.15,x,3.05,z,'#7a7b6c');const face=new T.Group();face.position.set(s*5.085,0,z);face.rotation.y=-s*Math.PI/2;root.add(face);
   piercedWall(face,len,3.02,(s<0?L.west:L.east).filter(it=>it.u>front&&it.u<back).map(it=>({x0:s*(it.u-z)-it.w/2,x1:s*(it.u-z)+it.w/2,y0:it.kind==='window'?L.sideWindow.sill:0,y1:it.kind==='window'?L.sideWindow.sill+L.sideWindow.height:it.kind==='plain-door'?2.10:2.70})));
-  box(len+.1,.16,.14,0,3.06,.05,'#844439',face);
+  // A single fascia is owned by courtyardFinish; duplicate roof-edge bands caused coplanar flicker.
  }
  wing(-1,-3.6,12.6);wing(1,-3.6,L.hallNorth);wing(1,L.hallSouth,12.6);
  facade(L.west,'west');facade(L.east,'east');
@@ -140,6 +141,7 @@ export function buildCourtyard(scene){
  addDetails({root,gate,gateLeaves,L,box,rod,ball,m});
  courtyardFinish({root,L,box,rod,ball,tileMaterial,texture});
  solidFinish(root);
+ renewDecor(root);addPearAndStorage(root,L);
  surfaceShading(root);
  return {root,gateLeaves,openings};
 }

@@ -1,6 +1,6 @@
 import * as T from './vendor/three.module.js';
-import {createSkyEnvironment} from './sky-environment.js?v=20.0';
-import {surface} from './navigation.js?v=20.0';
+import {createSkyEnvironment} from './sky-environment.js?v=21.3';
+import {surface} from './navigation.js?v=21.3';
 export function weatherKind(code){return [71,73,75,77,85,86].includes(code)?'snow':[51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(code)?'rain':code===0||code===1?'sun':'cloud';}
 export function seasonFor(month){return month>=3&&month<=5?'春':month>=6&&month<=8?'夏':month>=9&&month<=11?'秋':'冬';}
 export function weatherLabel(code){return ({0:'晴',1:'少云',2:'多云',3:'阴',45:'雾',48:'雾凇',51:'小毛毛雨',53:'毛毛雨',55:'强毛毛雨',56:'冻毛毛雨',57:'冻毛毛雨',61:'小雨',63:'中雨',65:'大雨',66:'冻雨',67:'强冻雨',71:'小雪',73:'中雪',75:'大雪',77:'米雪',80:'阵雨',81:'中阵雨',82:'强阵雨',85:'阵雪',86:'强阵雪',95:'雷雨',96:'雷雨伴冰雹',99:'雷雨伴强冰雹'})[code]||'天气状态未知';}
@@ -26,9 +26,9 @@ export function createWeather({scene,courtyard,sun}){
  function apply(){const d=dateParts(),season=seasonFor(d.month);dateEl.textContent=`${d.year}年${d.month}月${d.day}日 · ${season}`;
   if(lastSeason!==season){for(const [m,c]of leaves)m.color.copy(c).lerp(new T.Color(season==='秋'?'#8b7938':season==='冬'?'#69765c':season==='春'?'#739449':'#416c32'),season==='秋'?.26:.13);lastSeason=season;}
   const demo=select.value!=='live';active=demo?select.value:current?weatherKind(current.weather_code):'cloud';wind=demo?(active==='wind'?9:active==='rain'?4:2):current?Math.min(20,current.wind_speed_10m):0;windDirection=current?current.wind_direction_10m*Math.PI/180:Math.PI/3;day=demo?select.value!=='night':current?!!current.is_day:d.hour>=7&&d.hour<18;
-  rain.visible=active==='rain';snow.visible=active==='snow';solar.visible=day&&active==='sun';sun.intensity=day?(active==='sun'?3:active==='rain'||active==='snow'?.65:1.45):.08;hemi.intensity=day?(active==='sun'?1.2:.85):.30;sun.color.set(day?0xfff0d9:0xa2b8e5);scene.background.copy(day?active==='sun'?new T.Color('#b9d4e4'):new T.Color('#a8b1b7'):new T.Color('#202b40'));scene.fog=new T.Fog(scene.background,day?35:22,day?110:85);
+  rain.visible=active==='rain';snow.visible=active==='snow';solar.visible=day&&active==='sun';sun.intensity=day?(active==='sun'?3:active==='rain'||active==='snow'?.65:1.45):.08;hemi.intensity=day?(active==='sun'?1.65:1.4):1.35;sun.color.set(day?0xfff0d9:0xa2b8e5);scene.background.copy(day?active==='sun'?new T.Color('#b9d4e4'):new T.Color('#a8b1b7'):new T.Color('#202b40'));scene.fog=new T.Fog(scene.background,day?65:55,day?150:140);
   const hour=d.hour,angle=(hour-6)/12*Math.PI;solar.position.set(-Math.cos(angle)*35,Math.max(8,Math.sin(angle)*35),-30);sun.position.copy(solar.position);
-  skyEnvironment.set(day,active);scene.environmentIntensity=day?.65:.16;sun.position.copy(day?skyEnvironment.sunPosition:new T.Vector3(8,16,-61));if(!day){sun.intensity=.35;hemi.intensity=.48;}
+  skyEnvironment.set(day,active);scene.environmentIntensity=day?1.05:.85;sun.position.copy(day?skyEnvironment.sunPosition:new T.Vector3(8,16,-61));if(!day){sun.intensity=1.15;hemi.intensity=1.35;}
   const names={night:'星月夜景',sun:'晴',cloud:'多云 / 阴',rain:'降雨',snow:'降雪',wind:'大风'};
   if(demo){summary.textContent=`${names[active]} · 效果预览`;status.textContent='预览模式，不代表当前实况';}
   else if(current){summary.textContent=`${weatherLabel(current.weather_code)}${day?'':'（夜间）'} · ${current.temperature_2m.toFixed(1)}°C · 风 ${current.wind_speed_10m.toFixed(1)} m/s`;}

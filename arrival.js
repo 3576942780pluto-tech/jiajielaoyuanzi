@@ -1,9 +1,9 @@
 import * as T from './vendor/three.module.js';
-import {beveledBox} from './solid-materials.js?v=20.0';
+import {beveledBox} from './solid-materials.js?v=21.3';
 
 export function createArrival({renderer,scene,camera,courtyard,controls,host,environment}){
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
- const overlay=document.getElementById('arrival'),open=document.getElementById('arrival-open'),skip=document.getElementById('arrival-skip'),caption=document.getElementById('arrival-caption');
+ const overlay=document.getElementById('arrival'),open=document.getElementById('arrival-open'),caption=document.getElementById('arrival-caption');
  const canvas=renderer.domElement,originalCamera=camera.position.clone(),originalTarget=controls.target.clone();
  const stage=new T.Scene();stage.background=new T.Color('#090807');stage.environment=scene.environment;stage.environmentIntensity=.13;stage.fog=scene.fog?.clone();if(stage.fog){stage.fog.near=180;stage.fog.far=200;}environment.reveal(1);
  const eye=new T.PerspectiveCamera(38,innerWidth/innerHeight,.03,200);eye.position.set(5,5.4,7.5);eye.lookAt(0,.1,0);
@@ -36,12 +36,12 @@ export function createArrival({renderer,scene,camera,courtyard,controls,host,env
  const light=new T.SpotLight(0xffe6c1,110,35,.47,.8,1.3);light.position.set(-1,8,3);light.target.position.set(0,0,0);light.castShadow=true;light.shadow.mapSize.set(1024,1024);light.shadow.bias=-.00015;stage.add(light,light.target);
  const fill=new T.HemisphereLight(0xe0d5c7,0x17100b,.14);stage.add(fill);
  const daylight=scene.children.filter(o=>o.isLight).map(o=>{const copy=o.clone();copy.castShadow=false;const power=o.intensity;copy.intensity=0;stage.add(copy);return {copy,source:o};});
- const model=new T.Group();model.scale.setScalar(.103);model.position.set(0,.22,-.24);stage.add(model);model.add(courtyard);courtyard.visible=false;
+ const model=new T.Group();model.scale.setScalar(.103);model.position.set(0,.31,-.24);stage.add(model);model.add(courtyard);courtyard.visible=false;
  let warmed=false;let state='enter',started=null,phase=0,finished=false,lastNow=0;
  const ease=t=>t*t*(3-2*t),clamp=t=>Math.max(0,Math.min(1,t));
  const page=[document.querySelector('header'),document.querySelector('main')];page.forEach(e=>e.inert=true);document.body.classList.add('arriving');controls.enabled=false;
  open.disabled=true;caption.textContent='正在准备院落与光影…';
- let preparing=true,preparingPromiseSkip=false;
+ let preparing=true,awaitingEntry=true;
  const preparation=document.getElementById('memory-preparing'),progress=document.getElementById('memory-progress');
  const nextFrame=()=>new Promise(resolve=>requestAnimationFrame(resolve));
  async function gpuReady(){
@@ -49,6 +49,7 @@ export function createArrival({renderer,scene,camera,courtyard,controls,host,env
   const deadline=performance.now()+60000;
   try{while(true){if(gl.isContextLost())throw Error('WebGL context lost');const result=gl.clientWaitSync(fence,0,0);if(result===gl.ALREADY_SIGNALED||result===gl.CONDITION_SATISFIED)return;if(result===gl.WAIT_FAILED||performance.now()>deadline)throw Error('GPU preparation failed');await nextFrame();}}finally{gl.deleteSync(fence);}
  }
+ [leather,trim,brass,lining,stitchMat].forEach(m=>{m.transparent=true;});
  async function prepare(){
   progress.textContent='正在准备光影与材质…';
   Object.assign(canvas.style,{position:'fixed',left:'0px',top:'0px',width:'100vw',height:'100vh',zIndex:'40'});
@@ -64,14 +65,13 @@ export function createArrival({renderer,scene,camera,courtyard,controls,host,env
   suitcase.position.y=3.7;suitcase.rotation.set(.20,-.35,.12);
   for(let i=0;i<3;i++){renderer.shadowMap.needsUpdate=true;renderer.render(stage,eye);await gpuReady();await nextFrame();}
   // Start the entrance clock only after real GPU work has completed, not after a fixed timeout.
-  preparing=false;started=null;lastNow=0;overlay.inert=false;preparation.remove();
-  caption.textContent='一只行囊，装着四代人的故乡。';if(preparingPromiseSkip)finish();
+  preparing=false;preparation.setAttribute('aria-busy','false');progress.textContent='回忆已准备好，等你亲手取出。';const enter=document.getElementById('memory-enter');enter.hidden=false;enter.onclick=()=>{awaitingEntry=false;started=null;lastNow=0;overlay.inert=false;preparation.remove();caption.textContent='一只行囊，装着四代人的故乡。';open.focus({preventScroll:true});};
  }
  prepare().catch(e=>{console.warn('渲染准备未完成',e);progress.textContent='画面暂时未能准备好，请重新尝试。';preparation.setAttribute('aria-busy','false');document.getElementById('memory-retry').hidden=false;});
  function start(){if(state!=='ready')return;state='open';phase=lastNow;open.disabled=true;open.classList.add('depart');caption.textContent='院子还在，回忆就有了归处。';}
- function finish(){if(preparing){preparingPromiseSkip=true;return;}if(finished)return;finished=true;document.body.style.setProperty('--arrival-reveal','1');scene.add(environment.root);environment.reveal(1);scene.add(courtyard);renderer.shadowMap.needsUpdate=true;courtyard.visible=true;model.removeFromParent();canvas.removeAttribute('style');document.body.classList.remove('arriving');page.forEach(e=>e.inert=false);overlay.remove();camera.position.copy(originalCamera);controls.target.copy(originalTarget);controls.enabled=true;controls.autoRotate=false;const rotate=document.getElementById('rotate');rotate.textContent='自动旋转';rotate.setAttribute('aria-pressed','false');controls.update();renderer.setSize(host.clientWidth,host.clientHeight);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();document.getElementById('orbit').focus({preventScroll:true});open.removeEventListener('click',start);skip.removeEventListener('click',finish);resources.forEach(g=>g.dispose());[leather,trim,brass,lining,stitchMat,floor.material].forEach(m=>m.dispose());light.shadow.map?.dispose();}
- open.addEventListener('click',start);skip.addEventListener('click',finish);
- return {update(now){if(finished)return false;if(preparing)return true;lastNow=now;if(started===null)started=now;const elapsed=(now-started)/1000;
+ function finish(){if(preparing||awaitingEntry)return;if(finished)return;finished=true;document.body.style.setProperty('--arrival-reveal','1');scene.add(environment.root);environment.reveal(1);scene.add(courtyard);renderer.shadowMap.needsUpdate=true;courtyard.visible=true;model.removeFromParent();canvas.removeAttribute('style');document.body.classList.remove('arriving');page.forEach(e=>e.inert=false);overlay.remove();camera.position.copy(originalCamera);controls.target.copy(originalTarget);controls.enabled=true;controls.autoRotate=true;const rotate=document.getElementById('rotate');rotate.textContent='暂停旋转';rotate.setAttribute('aria-pressed','true');controls.update();renderer.setSize(host.clientWidth,host.clientHeight);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();document.getElementById('rotate').focus({preventScroll:true});open.removeEventListener('click',start);resources.forEach(g=>g.dispose());[leather,trim,brass,lining,stitchMat,floor.material].forEach(m=>m.dispose());light.shadow.map?.dispose();}
+ open.addEventListener('click',start);
+ return {update(now){if(finished)return false;if(preparing||awaitingEntry)return true;lastNow=now;if(started===null)started=now;const elapsed=(now-started)/1000;
   if(state==='enter'){const t=clamp(elapsed/(reduced?.25:2.3));suitcase.position.y=(1-ease(t))*3.7;suitcase.rotation.set((1-t)*.20,(1-ease(t))*-.35,(1-t)*.12);if(t===1){state='ready';open.disabled=false;caption.textContent='点击手提箱，打开家的记忆';}}
   if(state==='open'){const t=clamp((now-phase)/(reduced?250:1600));lid.rotation.x=-ease(t)*Math.PI*.64;courtyard.visible=t>.18;if(t===1){state='hold';phase=now;}}
   if(state==='hold'&&now-phase>=1000){state='travel';phase=now;overlay.classList.add('travelling');stage.add(environment.root);environment.reveal(0);}
@@ -79,9 +79,9 @@ export function createArrival({renderer,scene,camera,courtyard,controls,host,env
   if(state!=='travel'){eye.position.copy(initialEye);eye.lookAt(initialTarget);}
   let travel=state==='travel'?ease(clamp((now-phase)/(reduced?350:3000))):0;
   if(state==='travel'){
-   model.scale.setScalar(T.MathUtils.lerp(.103,1,travel));model.position.set(0,.22*(1-travel),-.24*(1-travel));
-   eye.position.lerpVectors(initialEye,originalCamera,travel);eye.lookAt(initialTarget.clone().lerp(originalTarget,travel));
-   environment.reveal(travel);suitcase.position.y=-travel*5;stage.background.copy(new T.Color('#090807')).lerp(scene.background,travel);
+   const growth=ease(clamp((travel-.30)/.70));model.scale.setScalar(T.MathUtils.lerp(.103,1,growth));model.position.set(0,.31*(1-growth),-.24*(1-growth));const boxFade=1-T.MathUtils.smoothstep(travel,0,.28);suitcase.visible=travel<.30;[leather,trim,brass,lining,stitchMat].forEach(m=>m.opacity=boxFade);
+   eye.position.lerpVectors(initialEye,originalCamera,growth);eye.lookAt(initialTarget.clone().lerp(originalTarget,growth));
+   environment.reveal(travel);suitcase.position.y=-Math.min(1,travel/.28)*4;stage.background.copy(new T.Color('#090807')).lerp(scene.background,travel);
    fill.intensity=.14*(1-travel);light.intensity=110*(1-travel);daylight.forEach(({copy,source})=>{copy.intensity=source.intensity*travel;copy.color.copy(source.color);copy.position.copy(source.position);});stage.environmentIntensity=T.MathUtils.lerp(.13,scene.environmentIntensity,travel);if(scene.fog){stage.fog=stage.fog||scene.fog.clone();stage.fog.color.copy(scene.fog.color);stage.fog.near=T.MathUtils.lerp(180,scene.fog.near,travel);stage.fog.far=T.MathUtils.lerp(200,scene.fog.far,travel);}
    floor.material.transparent=true;floor.material.opacity=1-travel;document.body.style.setProperty('--arrival-reveal',travel);
    if(travel>=1){finish();return false;}
