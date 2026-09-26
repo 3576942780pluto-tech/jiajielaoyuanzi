@@ -1,6 +1,6 @@
 import * as T from './vendor/three.module.js';
-import {outlines} from './ornament-outlines.js?v=21.3';
-import {beveledBox,solidMat} from './solid-materials.js?v=21.3';
+import {outlines} from './ornament-outlines.js?v=21.4';
+import {beveledBox,solidMat} from './solid-materials.js?v=21.4';
 // Turn photographed printed marks into thin, closed contour meshes. No image material survives.
 export function solidFinish(root){
  const mapped=[];root.traverse(o=>{if(o.isMesh&&o.material.map)mapped.push(o);});

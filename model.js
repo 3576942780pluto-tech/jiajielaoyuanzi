@@ -1,13 +1,13 @@
-import {renewDecor,addPearAndStorage} from './family-details.js?v=21.3';
+import {renewDecor,addPearAndStorage} from './family-details.js?v=21.4';
 import * as T from './vendor/three.module.js';
-import {addDetails,tileMaterial,texture} from './detail.js?v=21.3';
-import {courtyardFinish} from './interior.js?v=21.3';
-import {joinery} from './joinery.js?v=21.3';
-import {L} from './layout.js?v=21.3';
-import {beveledBox,mineralBlock} from './solid-materials.js?v=21.3';
-import {solidFinish} from './solid-finish.js?v=21.3';
-import {botanical} from './botanical.js?v=21.3';
-import {surfaceShading} from './surface-shading.js?v=21.3';
+import {addDetails,tileMaterial,texture} from './detail.js?v=21.4';
+import {courtyardFinish} from './interior.js?v=21.4';
+import {joinery} from './joinery.js?v=21.4';
+import {L} from './layout.js?v=21.4';
+import {beveledBox,mineralBlock} from './solid-materials.js?v=21.4';
+import {solidFinish} from './solid-finish.js?v=21.4';
+import {botanical} from './botanical.js?v=21.4';
+import {surfaceShading} from './surface-shading.js?v=21.4';
 
 export function buildCourtyard(scene){
  const root=new T.Group();root.name='courtyard';scene.add(root);const materials=new Map(),openings=[];

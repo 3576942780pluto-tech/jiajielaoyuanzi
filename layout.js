@@ -32,7 +32,7 @@ export const L={
 export const VIEWS={
   signage:{position:[9.05,1.83,5.95],target:[7.92,1.82,5.95]},
   pear:{position:[-.2,3.4,8.4],target:[3.4,1.7,11.93]},
-  storage:{position:[-3.7,6,11],target:[-4.5,.65,13.3]},
+  storage:{position:[-3.55,9.5,12.9],target:[-3.55,0,13.35]},
   upstairs:{position:[-3,3.7,-1.5],target:[-3.5,3.6,-6.6]},
   plants:{position:[.1,1.45,1.8],target:[-1.8,.95,-.6]},
   joinery:{position:[-2.4,1.75,4.7],target:[-5.1,1.65,4.1]},

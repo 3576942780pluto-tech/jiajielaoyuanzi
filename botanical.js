@@ -1,5 +1,5 @@
 import * as T from './vendor/three.module.js';
-import {solidMat} from './solid-materials.js?v=21.3';
+import {solidMat} from './solid-materials.js?v=21.4';
 export function botanical(root,p,y,z){
  let seed=17+Math.round(Math.abs(p.x)*811+p.step*91);const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
  const group=new T.Group();group.name=p.kind==='fig'?'无花果_分枝叶脉':p.kind==='cactus'?'仙人掌_刺座':'石榴_对生窄叶';group.position.set(p.x,y,z);group.scale.setScalar(p.scale);group.rotation.y=p.turn;root.add(group);

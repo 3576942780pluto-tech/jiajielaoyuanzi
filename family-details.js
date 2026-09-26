@@ -1,5 +1,5 @@
 import * as T from './vendor/three.module.js';
-import {glyphs} from './renewed-lettering.js?v=21.3';
+import {glyphs} from './renewed-lettering.js?v=21.4';
 const mat=(color,roughness=.6,metalness=0)=>new T.MeshStandardMaterial({color,roughness,metalness});
 function mesh(g,m,parent,x=0,y=0,z=0){const o=new T.Mesh(g,m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;parent.add(o);return o;}
 function rod(parent,a,b,r,m,r2=r){const d=new T.Vector3(...b).sub(new T.Vector3(...a)),o=mesh(new T.CylinderGeometry(r2,r,d.length(),9),m,parent);o.position.copy(new T.Vector3(...a).addScaledVector(d,.5));o.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.normalize());return o;}
